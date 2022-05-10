@@ -11,11 +11,30 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <pthread.h>
+#include <ncurses.h> 
 #define MAX 80
 #define PORT 8080
 #define SA struct sockaddr
 
-int globoSock;
+int globoSock, row, col;
+
+void initGraphics(){
+	initscr();
+	getmaxyx(stdscr,row,col); 
+}
+
+char *chatLine(){
+	char *buff;
+	int n = 0;
+
+	mvprintw(LINES - 2, 0, "Enter the string: ");
+
+	while ((buff[n++] = getch()) != '\n'){
+		mvprintw(LINES - 2, 18+n, "%s", buff[n]);
+	}
+
+	return buff;
+}
 
 void *entry_point(void *value){
 	int sockfd = globoSock;
@@ -23,10 +42,10 @@ void *entry_point(void *value){
 	for (;;) {
 		bzero(buff, sizeof(buff));
 		if(read(globoSock, buff, sizeof(buff)) > 0){
-			printf("From Server : %s", buff);
+			//printf("From Server : %s", buff);
 		}	
 		if ((strncmp(buff, "exit", 4)) == 0) {
-			printf("Client Exit...\n");
+			//printf("Client Exit...\n");
 			break;
 		}
 	}
@@ -39,9 +58,10 @@ void func(int sockfd){
 	int n;
 	for (;;) {
 		bzero(buff, sizeof(buff));
-		printf("Enter the string : ");
-		n = 0;
-		while ((buff[n++] = getchar()) != '\n');
+		strcpy(buff, chatLine());
+		//printf("Enter the string : ");
+		//n = 0;
+		//while ((buff[n++] = getchar()) != '\n');
 		write(sockfd, buff, sizeof(buff));
 		
 	}
@@ -79,6 +99,8 @@ int main()
 	pthread_t listen;
 
 	globoSock = sockfd;
+
+	initGraphics();
 
 
 	pthread_create(&listen, NULL, entry_point, "listen");
