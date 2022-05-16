@@ -18,30 +18,35 @@
 
 int globoSock, row, col;
 int n = 18;
+char sbuff[MAX];
+char cbuff[MAX];
 
 void initGraphics(){
-	initscr();
-	getmaxyx(stdscr,row,col); 
-	mvprintw(LINES - 4, 0, "From server: ");
-	mvprintw(LINES - 2, 0, "Enter the string: ");
+	system("clear");
+	printf("From server: \n");
+	printf("Enter the string: \n");
+}
+
+void print(){
+	printf("From server: %s\n", sbuff);
+	printf("enter the string: %s",cbuff);
 }
 
 void *entry_point(void *value){
 	int sockfd = globoSock;
 	char buff[MAX];
 	for (;;) {
-		mvprintw(LINES - 4, 0, "From server: ");
 		bzero(buff, sizeof(buff));
-		move(LINES - 2, n);
 
 		if(read(globoSock, buff, sizeof(buff)) > 0){
-			//printf("%s", buff);
+			system("clear");
+			strcpy(sbuff, buff);
+			print();
 
-			mvprintw(LINES - 4, 15, "%s", buff);
-			move(LINES - 2, n + 18);
+
 		}	
 		if ((strncmp(buff, "exit", 4)) == 0) {
-			mvprintw(LINES - 4, 15, "Client Exit...\n");
+			printf("Client Exit...\n");
 			break;
 		}
 	}
@@ -51,18 +56,16 @@ void *entry_point(void *value){
 
 void func(int sockfd){
 	char buff[MAX];
-	move(LINES - 2, 18);
 	for (;;) {
-		mvprintw(LINES - 2, 0, "Enter the string: ");
 		bzero(buff, sizeof(buff));
-		//printf("Enter the string : ");
+		print();
 		n = 0;
-		while ((buff[n] = getch()) != '\n'){
+		while ((buff[n] = getchar()) != '\n'){
 			//mvprintw(LINES - 2, 18+n, "%s", buff[n]);
+			cbuff[n] = buff[n];
 			n++;
 		}
 		write(sockfd, buff, sizeof(buff));
-		clrtoeol();
 		
 	}
 }
@@ -100,7 +103,7 @@ int main()
 
 	globoSock = sockfd;
 
-	initGraphics();
+	//initGraphics();
 
 	pthread_create(&listen, NULL, entry_point, "listen");
 
