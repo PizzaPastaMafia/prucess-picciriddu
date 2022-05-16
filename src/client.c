@@ -13,26 +13,35 @@
 #include <pthread.h>
 #include <ncurses.h> 
 #define MAX 80
-#define PORT 8080
+#define PORT 42069
 #define SA struct sockaddr
 
 int globoSock, row, col;
+int n = 18;
 
 void initGraphics(){
 	initscr();
 	getmaxyx(stdscr,row,col); 
+	mvprintw(LINES - 4, 0, "From server: ");
+	mvprintw(LINES - 2, 0, "Enter the string: ");
 }
 
 void *entry_point(void *value){
 	int sockfd = globoSock;
 	char buff[MAX];
 	for (;;) {
+		mvprintw(LINES - 4, 0, "From server: ");
 		bzero(buff, sizeof(buff));
+		move(LINES - 2, n);
+
 		if(read(globoSock, buff, sizeof(buff)) > 0){
-			//printf("From Server : %s", buff);
+			//printf("%s", buff);
+
+			mvprintw(LINES - 4, 15, "%s", buff);
+			move(LINES - 2, n + 18);
 		}	
 		if ((strncmp(buff, "exit", 4)) == 0) {
-			//printf("Client Exit...\n");
+			mvprintw(LINES - 4, 15, "Client Exit...\n");
 			break;
 		}
 	}
@@ -42,7 +51,7 @@ void *entry_point(void *value){
 
 void func(int sockfd){
 	char buff[MAX];
-	int n;
+	move(LINES - 2, 18);
 	for (;;) {
 		mvprintw(LINES - 2, 0, "Enter the string: ");
 		bzero(buff, sizeof(buff));
@@ -53,6 +62,7 @@ void func(int sockfd){
 			n++;
 		}
 		write(sockfd, buff, sizeof(buff));
+		clrtoeol();
 		
 	}
 }
@@ -101,4 +111,5 @@ int main()
 
 	// close the socket
 	close(sockfd);
+	return 0;
 }

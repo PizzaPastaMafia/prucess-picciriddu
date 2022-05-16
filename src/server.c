@@ -13,21 +13,22 @@
 #include <pthread.h>
 
 #define MAX 80
-#define PORT 8080
+#define PORT 42069
 #define SA struct sockaddr
 
 int globoSock;
+int closed = 1;
 
 void *entry_point(void *value){
 	char buff[MAX];
 
-	for (;;) {
+	while(!closed) {
 		bzero(buff, MAX);
 
 		// read the message from client and copy it in buffer
 		if(read(globoSock, buff, sizeof(buff)) > 0){
 		// print buffer which contains the client contents
-		printf("From client: %s\t To client : ", buff);
+			printf("From client: %s\n", buff);
 		}
 	
 	}
@@ -53,6 +54,7 @@ void func(int connfd)
 		// if msg contains "Exit" then server exit and chat ended.
 		if (strncmp("exit", buff, 4) == 0) {
 			printf("Server Exit...\n");
+			closed = 1;
 			break;
 		}
 	}
@@ -104,6 +106,7 @@ int main()
 	}else{
 		printf("server accept the client...\n");
 	}
+	closed = 0;
 
 	pthread_t listen;
 	globoSock = connfd;
@@ -117,4 +120,6 @@ int main()
 
 	// After chatting close the socket
 	close(sockfd);
+	printf("socket closed");
+	return 0;
 }
