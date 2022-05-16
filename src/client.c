@@ -23,19 +23,6 @@ void initGraphics(){
 	getmaxyx(stdscr,row,col); 
 }
 
-char *chatLine(){
-	char *buff;
-	int n = 0;
-
-	mvprintw(LINES - 2, 0, "Enter the string: ");
-
-	while ((buff[n++] = getch()) != '\n'){
-		mvprintw(LINES - 2, 18+n, "%s", buff[n]);
-	}
-
-	return buff;
-}
-
 void *entry_point(void *value){
 	int sockfd = globoSock;
 	char buff[MAX];
@@ -57,11 +44,14 @@ void func(int sockfd){
 	char buff[MAX];
 	int n;
 	for (;;) {
+		mvprintw(LINES - 2, 0, "Enter the string: ");
 		bzero(buff, sizeof(buff));
-		strcpy(buff, chatLine());
 		//printf("Enter the string : ");
-		//n = 0;
-		//while ((buff[n++] = getchar()) != '\n');
+		n = 0;
+		while ((buff[n] = getch()) != '\n'){
+			//mvprintw(LINES - 2, 18+n, "%s", buff[n]);
+			n++;
+		}
 		write(sockfd, buff, sizeof(buff));
 		
 	}
@@ -101,7 +91,6 @@ int main()
 	globoSock = sockfd;
 
 	initGraphics();
-
 
 	pthread_create(&listen, NULL, entry_point, "listen");
 
